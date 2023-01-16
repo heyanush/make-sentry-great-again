@@ -6,15 +6,22 @@ import requests
 import json
 import hashlib
 import hmac
+import os
+
+if not os.environ.get("PRODUCTION"):
+    from dotenv import load_dotenv
+
+    load_dotenv()
 
 app = Flask(__name__)
 
-JIRA_PROJECT_NAME = '' #Your JIRA project name
-JIRA_USERNAME = '' #Your JIRA username
-JIRA_PASSWORD = '' #Your JIRA password
-JIRA_SERVER_URL = '' #Your JIRA server URL
-SENTRY_CLIENT_SECRET = '' #Client secret key is provided in the internal integration page in Sentry
-SENTRY_AUTH_TOKEN = '' #Sentry auth token is provided in the internal integration page in Sentry
+JIRA_PROJECT_NAME = os.environ.get("JIRA_PROJECT_NAME") #Your JIRA project name
+JIRA_PARENT_NAME = os.environ.get("JIRA_PARENT_NAME") #Your JIRA parent name
+JIRA_USERNAME = os.environ.get("JIRA_USERNAME") #Your JIRA username
+JIRA_TOKEN = os.environ.get("JIRA_TOKEN") #Your JIRA password
+JIRA_SERVER_URL = os.environ.get("JIRA_SERVER_URL") #Your JIRA server URL
+SENTRY_CLIENT_SECRET = os.environ.get("SENTRY_CLIENT_SECRET") #Client secret key is provided in the internal integration page in Sentry
+SENTRY_AUTH_TOKEN = os.environ.get("SENTRY_AUTH_TOKEN") #Sentry auth token is provided in the internal integration page in Sentry
 SENTRY_EXTERNAL_ISSUE_API = 'https://sentry.io/api/0/sentry-app-installations/'
 SENTRY_UPDATE_ISSUE_API = 'https://sentry.io/api/0/issues/'
 headers = {
@@ -23,7 +30,7 @@ headers = {
 }
 
 jira = JIRA(
-    basic_auth=(JIRA_USERNAME, JIRA_PASSWORD),
+    basic_auth=(JIRA_USERNAME, JIRA_TOKEN),
     server=JIRA_SERVER_URL
 )
 
@@ -145,6 +152,7 @@ def createIssueTicket(data):
     print(sanitized_summary) #log issue summary
     issue_dict = {
         'project': {'key': JIRA_PROJECT_NAME},
+        'parent': {'key': JIRA_PARENT_NAME},
         'summary': sanitized_summary,
         'description': description,
         'issuetype': {'name': 'Bug'},
