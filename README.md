@@ -1,4 +1,4 @@
-# sentry_jira_server_webhook
+# Make Sentry Great Again
 
 Creating Internal Integration in Sentry:
 1) Go to Organization Settings -> Developer Settings, click on "Create New Integration"
@@ -42,5 +42,8 @@ Command for starting the Flask server:
 flask --app main run
 ```
 
+## Useful links
 
+- https://medium.com/techfront/step-by-step-visual-guide-on-deploying-a-flask-application-on-aws-ec2-8e3e8b82c4f7
+- https://serverfault.com/questions/413397/how-to-set-environment-variable-in-systemd-service
 
