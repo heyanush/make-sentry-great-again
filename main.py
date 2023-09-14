@@ -58,9 +58,7 @@ def authenticate(req):
 # This endpoint will only be called if the 'alert-rule-action' is present in the schema.
 @app.route("/api/sentry/alert-rule-action/", methods=["POST"])
 def alert_rule_action():
-    payload = request.json
-    authenticate(request)
-    
+
     return ("", 200, None)
 
 @app.route('/update_sentry', methods=['POST']) #Webhook for incoming request from JIRA server
