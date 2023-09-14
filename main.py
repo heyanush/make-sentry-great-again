@@ -55,6 +55,14 @@ def authenticate(req):
         raise Exception("Permission denied: The signature doesn't match")
 
 
+# This endpoint will only be called if the 'alert-rule-action' is present in the schema.
+@app.route("/api/sentry/alert-rule-action/", methods=["POST"])
+def alert_rule_action():
+    payload = request.json
+    authenticate(request)
+    
+    return ("", 200, None)
+
 @app.route('/update_sentry', methods=['POST']) #Webhook for incoming request from JIRA server
 def update_sentry():
     print("Incoming request from JIRA server")
@@ -158,6 +166,17 @@ def createIssueTicket(data):
         'issuetype': {'name': 'Bug'},
         'labels': [issue_id]
     }
+
+    try:
+        params = data['issue_alert']['settings']
+        for value in params:
+            try:
+                issue_dict[value['name']] = json.loads(value['value'])
+            except ValueError as e:
+                issue_dict[value['name']] = [value['value']]
+    except KeyError:
+        pass
+
     new_issue = jira.create_issue(fields=issue_dict)
     print(new_issue) #log jira issue name
     return new_issue
