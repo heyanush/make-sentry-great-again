@@ -15,8 +15,6 @@ if not os.environ.get("PRODUCTION"):
 
 app = Flask(__name__)
 
-JIRA_PROJECT_NAME = os.environ.get("JIRA_PROJECT_NAME") #Your JIRA project name
-JIRA_PARENT_NAME = os.environ.get("JIRA_PARENT_NAME") #Your JIRA parent name
 JIRA_USERNAME = os.environ.get("JIRA_USERNAME") #Your JIRA username
 JIRA_TOKEN = os.environ.get("JIRA_TOKEN") #Your JIRA password
 JIRA_SERVER_URL = os.environ.get("JIRA_SERVER_URL") #Your JIRA server URL
@@ -111,7 +109,7 @@ def webhook():
         new_issue = createIssueTicket(data)
         externalWebUrl = JIRA_SERVER_URL + '/browse/' + new_issue.key
         issue_id = data['event']['issue_id']
-        createExternalIssue(issue_id, externalWebUrl, JIRA_PROJECT_NAME, new_issue.key, sentry_integration_uuid)
+        createExternalIssue(issue_id, externalWebUrl, new_issue.key, sentry_integration_uuid)
 
     #Metric Alert payload object: https://docs.sentry.io/product/integrations/integration-platform/webhooks/metric-alerts/
     elif action == 'critical': #Critical metric alert has been triggered in Sentry
@@ -157,21 +155,25 @@ def createIssueTicket(data):
     sanitized_summary = sanitize_summary(summary)
     print(sanitized_summary) #log issue summary
     issue_dict = {
-        'project': {'key': JIRA_PROJECT_NAME},
-        'parent': {'key': JIRA_PARENT_NAME},
         'summary': sanitized_summary,
         'description': description,
-        'issuetype': {'name': 'Bug'},
         'labels': [issue_id]
     }
 
     try:
         params = data['issue_alert']['settings']
         for value in params:
-            try:
-                issue_dict[value['name']] = json.loads(value['value'])
-            except ValueError as e:
-                issue_dict[value['name']] = [value['value']]
+            if value['name'] == 'project':
+                issue_dict['project'] = {'key': value['value']}
+            elif value['name'] == 'parent':
+                issue_dict['parent'] = {'key': value['value']}
+            elif value['name'] == 'issuetype':
+                issue_dict['issuetype'] = {'name': value['value']}
+            else:
+                try:
+                    issue_dict[value['name']] = json.loads(value['value'])
+                except ValueError as e:
+                    issue_dict[value['name']] = [value['value']]
     except KeyError:
         pass
 
@@ -181,9 +183,10 @@ def createIssueTicket(data):
 
 
 
-def createExternalIssue(issueId, webUrl, project, identifier, sentry_integration_uuid):
+def createExternalIssue(issueId, webUrl, identifier, sentry_integration_uuid):
     #Linking the JIRA ticket to a Sentry issue: https://docs.sentry.io/api/integration/create-an-external-issue/
     print(issueId)
+    project = 'Jira'
     payload = json.dumps({
         "issueId": issueId,
         "webUrl": webUrl,

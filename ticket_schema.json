@@ -1,0 +1,32 @@
+{
+  "elements": [
+    {
+      "type": "alert-rule-action",
+      "title": "Create an alert ticket in Jira",
+      "settings": {
+        "type": "alert-rule-settings",
+        "uri": "/api/sentry/alert-rule-action/",
+        "description": "Provide the details for the alert ticket",
+        "required_fields": [
+          {
+            "type": "text",
+            "label": "Project",
+            "name": "project"
+          },
+          {
+            "type": "text",
+            "label": "Issue Type",
+            "name": "issuetype"
+          }
+        ],
+        "optional_fields": [
+          {
+            "type": "text",
+            "label": "Parent",
+            "name": "parent"
+          }
+        ]
+      }
+    }
+  ]
+}
