@@ -18,19 +18,21 @@ app = Flask(__name__)
 JIRA_USERNAME = os.environ.get("JIRA_USERNAME") #Your JIRA username
 JIRA_TOKEN = os.environ.get("JIRA_TOKEN") #Your JIRA password
 JIRA_SERVER_URL = os.environ.get("JIRA_SERVER_URL") #Your JIRA server URL
-SENTRY_CLIENT_SECRET = os.environ.get("SENTRY_CLIENT_SECRET") #Client secret key is provided in the internal integration page in Sentry
-SENTRY_AUTH_TOKEN = os.environ.get("SENTRY_AUTH_TOKEN") #Sentry auth token is provided in the internal integration page in Sentry
+SENTRY_CLIENT_SECRET = None #Client secret key is provided in the internal integration page in Sentry
+SENTRY_AUTH_TOKEN = None #Sentry auth token is provided in the internal integration page in Sentry
 SENTRY_EXTERNAL_ISSUE_API = 'https://sentry.io/api/0/sentry-app-installations/'
 SENTRY_UPDATE_ISSUE_API = 'https://sentry.io/api/0/issues/'
-headers = {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + SENTRY_AUTH_TOKEN
-}
 
 jira = JIRA(
     basic_auth=(JIRA_USERNAME, JIRA_TOKEN),
     server=JIRA_SERVER_URL
 )
+
+def getHeaderForSentry():
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SENTRY_AUTH_TOKEN
+    }
 
 def sanitize_summary(text):
     text.strip()
@@ -74,7 +76,7 @@ def update_sentry():
         print(data)
         api_endpoint = SENTRY_UPDATE_ISSUE_API + issue_id + '/'
         print(api_endpoint)
-        response = requests.request("PUT", api_endpoint, headers=headers, data=data)
+        response = requests.request("PUT", api_endpoint, headers=getHeaderForSentry(), data=data)
         print(response)
     
     elif payload['issue']['fields']['status']['name'] == "To Do": #Marking the issue as To Do in JIRA will unresolved the issue in Sentry
@@ -87,15 +89,19 @@ def update_sentry():
         print(data)
         api_endpoint = SENTRY_UPDATE_ISSUE_API + issue_id + '/'
         print(api_endpoint)
-        response = requests.request("PUT", api_endpoint, headers=headers, data=data)
+        response = requests.request("PUT", api_endpoint, headers=getHeaderForSentry(), data=data)
         print(response)
 
     return ("", 200, None)
     
 
 
-@app.route('/', methods=['POST']) #Webhook for incoming requests from Sentry
-def webhook():
+@app.route('/api/sentry/log/<project>', methods=['POST']) #Webhook for incoming requests from Sentry
+def webhook(project):
+    global SENTRY_CLIENT_SECRET, SENTRY_AUTH_TOKEN
+    SENTRY_CLIENT_SECRET = os.environ.get("SENTRY_CLIENT_SECRET_" + project.upper())
+    SENTRY_AUTH_TOKEN = os.environ.get("SENTRY_AUTH_TOKEN_" + project.upper())
+
     payload = request.json
     #print(payload)
     authenticate(request)
@@ -195,7 +201,7 @@ def createExternalIssue(issueId, webUrl, identifier, sentry_integration_uuid):
     })
     api_endpoint = SENTRY_EXTERNAL_ISSUE_API + sentry_integration_uuid + '/external-issues/'
     print(api_endpoint)
-    response = requests.request("POST", api_endpoint, headers=headers, data=payload)
+    response = requests.request("POST", api_endpoint, headers=getHeaderForSentry(), data=payload)
     print(response.text)
     return response
 
