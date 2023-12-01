@@ -56,6 +56,7 @@ def authenticate(req):
 
 
 # This endpoint will only be called if the 'alert-rule-action' is present in the schema.
+@app.route("/api/sentry/alert-rule-action/", methods=["POST"])
 @app.route("/<project>/api/sentry/alert-rule-action/", methods=["POST"])
 def alert_rule_action(project):
 
