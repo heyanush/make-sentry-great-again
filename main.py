@@ -56,8 +56,8 @@ def authenticate(req):
 
 
 # This endpoint will only be called if the 'alert-rule-action' is present in the schema.
-@app.route("/api/sentry/alert-rule-action/", methods=["POST"])
-def alert_rule_action():
+@app.route("/<project>/api/sentry/alert-rule-action/", methods=["POST"])
+def alert_rule_action(project):
 
     return ("", 200, None)
 
@@ -96,7 +96,7 @@ def update_sentry():
     
 
 
-@app.route('/api/sentry/log/<project>', methods=['POST']) #Webhook for incoming requests from Sentry
+@app.route('/<project>/', methods=['POST']) #Webhook for incoming requests from Sentry
 def webhook(project):
     global SENTRY_CLIENT_SECRET, SENTRY_AUTH_TOKEN
     SENTRY_CLIENT_SECRET = os.environ.get("SENTRY_CLIENT_SECRET_" + project.upper())
