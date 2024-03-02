@@ -24,6 +24,16 @@
             "type": "text",
             "label": "Parent",
             "name": "parent"
+          },
+          {
+            "type": "text",
+            "label": "Jira Email (leave blank to use the default email)",
+            "name": "jirausername"
+          },
+          {
+            "type": "text",
+            "label": "Jira Token (leave blank to use the default token)",
+            "name": "jiratoken"
           }
         ]
       }
