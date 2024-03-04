@@ -43,13 +43,12 @@ def escape_string_for_jql(input_string):
     if not input_string:
         return input_string
 
-    special_characters = r'+-&|!{}[]^"~*?/'  # Special characters in JQL syntax
     escaped_string = ''
     for char in input_string:
         if char == '\\':
             escaped_string += '\\\\'
-        elif char in special_characters:
-            escaped_string += '\\' + char
+        elif char == '"' :
+            escaped_string += '\\\\\\' + char
         else:
             escaped_string += char
     return escaped_string
