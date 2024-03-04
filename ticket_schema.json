@@ -1,6 +1,29 @@
 {
   "elements": [
     {
+      "type": "issue-link",
+      "link": {
+        "uri": "/sentry/issues/link",
+        "required_fields": [
+          {
+            "type": "text",
+            "label": "Please use Jira plugin to manually link the issue",
+            "name": "title"
+          }
+        ]
+      },
+      "create": {
+        "uri": "/sentry/issues/create",
+        "required_fields": [
+          {
+            "type": "text",
+            "label": "Please use Jira plugin to manually link the create",
+            "name": "title"
+          }
+        ]
+      }
+    },
+    {
       "type": "alert-rule-action",
       "title": "Create an alert ticket in Jira",
       "settings": {
