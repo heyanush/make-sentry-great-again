@@ -39,6 +39,21 @@ def sanitize(text):
     text = text.strip().replace("\r", "").replace("\n", "")
     return text[:255]
 
+def escape_string_for_jql(input_string):
+    if not input_string:
+        return input_string
+
+    special_characters = r'+-&|!{}[]^"~*?/'  # Special characters in JQL syntax
+    escaped_string = ''
+    for char in input_string:
+        if char == '\\':
+            escaped_string += '\\\\'
+        elif char in special_characters:
+            escaped_string += '\\' + char
+        else:
+            escaped_string += char
+    return escaped_string
+
 
 def authenticate(req):
     expected_digest = req.headers.get('sentry-hook-signature')
@@ -130,7 +145,7 @@ def create_jira_ticket(data):
     )
     
     # Find if the issue already existy by issue summary
-    issues = jira.search_issues(f'summary ~ "\\"{summary}\\""')
+    issues = jira.search_issues(f'summary ~ "\\"{escape_string_for_jql(summary)}\\""')
     if issues:
         return issues[0]
 
